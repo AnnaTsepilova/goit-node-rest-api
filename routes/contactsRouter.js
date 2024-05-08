@@ -5,6 +5,7 @@ import {
   createContact,
   updateContact,
   deleteContact,
+  updateStatusContact,
 } from "../controllers/contactsControllers.js";
 
 import isEmptyBody from "../helpers/isEmptyBody.js";
@@ -41,7 +42,7 @@ contactsRouter.patch(
   isValidId,
   isEmptyBody,
   validateBody(updateContactSchema),
-  updateContact
+  updateStatusContact
 );
 
 contactsRouter.delete("/:id", isValidId, deleteContact);
