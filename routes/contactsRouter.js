@@ -9,6 +9,7 @@ import {
 
 import isEmptyBody from "../helpers/isEmptyBody.js";
 import validateBody from "../helpers/validateBody.js";
+import isValidId from "../helpers/isValidId.js";
 import {
   createContactSchema,
   updateContactSchema,
@@ -28,12 +29,21 @@ contactsRouter.post(
 );
 
 contactsRouter.put(
-  "/:id",
+  "/test/:id",
+  isValidId,
   isEmptyBody,
   validateBody(updateContactSchema),
   updateContact
 );
 
-contactsRouter.delete("/:id", deleteContact);
+contactsRouter.patch(
+  "/:id/favorite",
+  isValidId,
+  isEmptyBody,
+  validateBody(updateContactSchema),
+  updateContact
+);
+
+contactsRouter.delete("/:id", isValidId, deleteContact);
 
 export default contactsRouter;
