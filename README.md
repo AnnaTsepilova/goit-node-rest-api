@@ -10,7 +10,7 @@
 
 ### Крок 2
 
-Встановити графічний редактор [MongoDB Compass][https://www.mongodb.com/try/download/compass] для зручної роботи з базою даних для MongoDB. Налаштувати підключення своєї хмарної бази даних до Compass. У MongoDB Atlas створити користувача з правами адміністратора.
+Встановити графічний редактор [MongoDB Compass](https://www.mongodb.com/try/download/compass) для зручної роботи з базою даних для MongoDB. Налаштувати підключення своєї хмарної бази даних до Compass. У MongoDB Atlas створити користувача з правами адміністратора.
 
 ### Крок 3
 
