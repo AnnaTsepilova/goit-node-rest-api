@@ -14,13 +14,14 @@ import isValidId from "../helpers/isValidId.js";
 import {
   createContactSchema,
   updateContactSchema,
+  updateFavoriteStatusSchema,
 } from "../schemas/contactsSchemas.js";
 
 const contactsRouter = express.Router();
 
 contactsRouter.get("/", getAllContacts);
 
-contactsRouter.get("/:id", getOneContact);
+contactsRouter.get("/:id", isValidId, getOneContact);
 
 contactsRouter.post(
   "/",
@@ -30,7 +31,7 @@ contactsRouter.post(
 );
 
 contactsRouter.put(
-  "/test/:id",
+  "/:id",
   isValidId,
   isEmptyBody,
   validateBody(updateContactSchema),
@@ -41,7 +42,7 @@ contactsRouter.patch(
   "/:id/favorite",
   isValidId,
   isEmptyBody,
-  validateBody(updateContactSchema),
+  validateBody(updateFavoriteStatusSchema),
   updateStatusContact
 );
 
