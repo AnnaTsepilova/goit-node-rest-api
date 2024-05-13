@@ -49,6 +49,23 @@ export const updateContact = async (req, res, next) => {
   }
 };
 
+export const updateStatusContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { favorite } = req.body;
+    const result = await contactsService.updateContact(id, {
+      favorite: favorite,
+    });
+    if (!result) {
+      throw HttpError(404);
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
