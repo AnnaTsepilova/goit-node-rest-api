@@ -3,7 +3,6 @@ import express from "express";
 import * as authControllers from "../controllers/authControllers.js";
 import isEmptyBody from "../helpers/isEmptyBody.js";
 import validateBody from "../helpers/validateBody.js";
-import isValidId from "../helpers/isValidId.js";
 
 import { authSignUpSchema, authSignInSchema } from "../schemas/authSchemas.js";
 
@@ -14,6 +13,13 @@ authRouter.post(
   isEmptyBody,
   validateBody(authSignUpSchema),
   authControllers.signUp
+);
+
+authRouter.post(
+  "/users/login",
+  isEmptyBody,
+  validateBody(authSignInSchema),
+  authControllers.signIn
 );
 
 export default authRouter;
