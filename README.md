@@ -8,7 +8,7 @@
 
 1. У коді створити схему і модель користувача для колекції users.
 
-```
+```js
 {
   password: {
     type: String,
@@ -33,7 +33,7 @@
 
 2. Змінити схему контактів, щоб кожен користувач бачив тільки свої контакти. Для цього в схемі контактів додати властивість
 
-```
+```js
    owner: {
       type: Schema.Types.ObjectId,
       ref: 'user',
@@ -42,7 +42,7 @@
 
 ### Крок 2
 
-**Реєстрація**
+#### Реєстрація
 
 1. Створити ендпоінт `/users/register `
 2. Зробити валідацію всіх обов'язкових полів (email і password). При помилці валідації повернути `Помилку валідації`.
@@ -53,7 +53,7 @@
 
 **Registration request**
 
-```
+```shell
 POST /users/register
 Content-Type: application/json
 RequestBody: {
@@ -64,7 +64,7 @@ RequestBody: {
 
 **Registration validation error**
 
-```
+```shell
 Status: 400 Bad Request
 Content-Type: application/json
 ResponseBody: <Помилка від Joi або іншої бібліотеки валідації>
@@ -72,7 +72,7 @@ ResponseBody: <Помилка від Joi або іншої бібліотеки 
 
 **Registration conflict error**
 
-```
+```shell
 Status: 409 Conflict
 Content-Type: application/json
 ResponseBody: {
@@ -82,7 +82,7 @@ ResponseBody: {
 
 **Registration success response**
 
-```
+```shell
 Status: 201 Created
 Content-Type: application/json
 ResponseBody: {
@@ -93,7 +93,7 @@ ResponseBody: {
 }
 ```
 
-**Логін**
+#### Логін
 
 1. Створити ендпоінт `/users/login`
 2. В моделі `User` знайти користувача за `email`.
@@ -104,7 +104,7 @@ ResponseBody: {
 
 **Login request**
 
-```
+```shell
 POST /users/login
 Content-Type: application/json
 RequestBody: {
@@ -115,7 +115,7 @@ RequestBody: {
 
 **Login validation error**
 
-```
+```shell
 Status: 400 Bad Request
 Content-Type: application/json
 ResponseBody: {
@@ -125,7 +125,7 @@ ResponseBody: {
 
 **Login success response**
 
-```
+```shell
 Status: 200 OK
 Content-Type: application/json
 ResponseBody: {
@@ -139,7 +139,7 @@ ResponseBody: {
 
 **Login auth error**
 
-```
+```shell
 Status: 401 Unauthorized
 ResponseBody: {
   "message": "Email or password is wrong"
@@ -148,7 +148,7 @@ ResponseBody: {
 
 ### Крок 3
 
-**Перевірка токена**
+#### Перевірка токена
 
 Створити мідлвар для перевірки токена і додай його до всіх раутів, які повинні бути захищені.
 
@@ -160,7 +160,7 @@ ResponseBody: {
 
 **Middleware unauthorized error**
 
-```
+```shell
 Status: 401 Unauthorized
 Content-Type: application/json
 ResponseBody: {
@@ -170,7 +170,7 @@ ResponseBody: {
 
 ### Крок 4
 
-**Логаут**
+#### Логаут
 
 1. Створити ендпоінт `/users/logout`
 2. Додати в маршрут мідлвар перевірки токена.
@@ -181,14 +181,14 @@ ResponseBody: {
 
 **Logout request**
 
-```
+```shell
 POST /users/logout
 Authorization: "Bearer {{token}}"
 ```
 
 **Logout unauthorized error**
 
-```
+```shell
 Status: 401 Unauthorized
 Content-Type: application/json
 ResponseBody: {
@@ -198,13 +198,13 @@ ResponseBody: {
 
 **Logout success response**
 
-```
+```shell
 Status: 204 No Content
 ```
 
 ### Крок 5
 
-Поточний користувач - отримати дані юзера по токені
+#### Поточний користувач - отримати дані юзера по токені
 
 1. Створити ендпоінт `/users/current`
 2. Додати в раут мідлвар перевірки токена.
@@ -214,14 +214,14 @@ Status: 204 No Content
 
 **Current user request**
 
-```
+```shell
 GET /users/current
 Authorization: "Bearer {{token}}"
 ```
 
 **Current user unauthorized error**
 
-```
+```shell
 Status: 401 Unauthorized
 Content-Type: application/json
 ResponseBody: {
@@ -231,7 +231,7 @@ ResponseBody: {
 
 **Current user success response**
 
-```
+```shell
 Status: 200 OK
 Content-Type: application/json
 ResponseBody: {
