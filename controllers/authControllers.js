@@ -41,6 +41,7 @@ export const signIn = async (req, res, next) => {
     const payload = { id };
 
     const token = createToken(payload);
+    await authServises.updateUser({ _id: id }, { token });
 
     res.status(200).json({
       token: token,

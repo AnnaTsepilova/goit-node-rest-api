@@ -3,6 +3,7 @@ import HttpError from "../helpers/HttpError.js";
 
 export const getAllContacts = async (req, res, next) => {
   try {
+    const { page = 1, limit = 10 } = req.query;
     const result = await contactsService.listContacts();
     res.json(result);
   } catch (error) {
@@ -27,7 +28,8 @@ export const getOneContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const result = await contactsService.addContact(req.body);
+    const { _id: owner } = req.user;
+    const result = await contactsService.addContact({ ...req.body, owner });
     res.status(201).json(result);
   } catch (error) {
     next(error);
