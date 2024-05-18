@@ -11,4 +11,6 @@ export function findUser(data) {
   return User.findOne(data);
 }
 
-export const updateUser = (filter, data) => User.findOneAndUpdate(filter, data);
+export const updateUser = (filter, data) => {
+  return User.findOneAndUpdate(filter, data);
+};

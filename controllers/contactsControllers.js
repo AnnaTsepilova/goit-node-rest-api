@@ -6,7 +6,8 @@ export const getAllContacts = async (req, res, next) => {
     const { _id: owner } = req.user;
     const { favorite } = req.query;
 
-    const filter = { owner, favorite };
+    const filter = favorite ? { owner, favorite } : { owner };
+
     const fields = "";
 
     const { page = 1, limit = 20 } = req.query;

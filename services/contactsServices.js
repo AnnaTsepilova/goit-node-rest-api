@@ -2,7 +2,6 @@ import Contact from "../models/Contact.js";
 
 export function listContacts(search = {}) {
   const { filter = {}, fields = "", settings = {} } = search;
-  console.log("settings listContacts:>> ", settings);
   return Contact.find(filter, fields, settings).populate("owner", "_id email");
 }
 

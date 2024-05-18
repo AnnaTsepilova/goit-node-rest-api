@@ -87,22 +87,18 @@ export const updateSubscription = async (req, res, next) => {
     const { _id } = req.user;
     const { subscription } = req.body;
 
-    console.log("_id :>> ", _id);
-    console.log("subscription :>> ", subscription);
-
-    const result = await updateUser(
+    const result = await authServises.updateUser(
       { _id },
       {
         subscription: subscription,
       }
     );
 
-    console.log("result :>> ", result);
-
     if (!result) {
       throw HttpError(400, "Missing field subscription");
     }
-    return res.status(200).json(result);
+
+    return res.status(200).json({ email: result.email, subscription });
   } catch (error) {
     next(error.message);
   }
