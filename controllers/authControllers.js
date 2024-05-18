@@ -54,3 +54,56 @@ export const signIn = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCurrentUser = async (req, res, next) => {
+  try {
+    const { email, subscription } = req.user;
+
+    res.json({ email, subscription });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signOut = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    const user = await authServises.findUser(_id);
+
+    if (!user) {
+      throw HttpError(401, "Not authorized");
+    }
+
+    await authServises.updateUser({ _id }, { token: null });
+
+    res.status(204).json();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateSubscription = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    const { subscription } = req.body;
+
+    console.log("_id :>> ", _id);
+    console.log("subscription :>> ", subscription);
+
+    const result = await updateUser(
+      { _id },
+      {
+        subscription: subscription,
+      }
+    );
+
+    console.log("result :>> ", result);
+
+    if (!result) {
+      throw HttpError(400, "Missing field subscription");
+    }
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error.message);
+  }
+};
