@@ -14,25 +14,25 @@ import {
 const authRouter = express.Router();
 
 authRouter.post(
-  "/users/register",
+  "/register",
   isEmptyBody,
   validateBody(authSignUpSchema),
   authControllers.signUp
 );
 
 authRouter.post(
-  "/users/login",
+  "/login",
   isEmptyBody,
   validateBody(authSignInSchema),
   authControllers.signIn
 );
 
-authRouter.post("/users/logout", authenticate, authControllers.signOut);
+authRouter.post("/logout", authenticate, authControllers.signOut);
 
-authRouter.get("/users/current", authenticate, authControllers.getCurrentUser);
+authRouter.get("/current", authenticate, authControllers.getCurrentUser);
 
 authRouter.patch(
-  "/users",
+  "/",
   authenticate,
   isEmptyBody,
   validateBody(subscriptionSchema),

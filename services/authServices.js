@@ -2,15 +2,16 @@ import bcrypt from "bcrypt";
 
 import User from "../models/User.js";
 
-export function saveUser(data) {
-  const hashPassword = bcrypt.hash(data.password, 10);
+export async function saveUser(data) {
+  const hashPassword = await bcrypt.hash(data.password, 10);
+  console.log("hashPassword :>> ", hashPassword);
   return User.create({ ...data, password: hashPassword });
 }
 
-export function findUser(data) {
-  return User.findOne(data);
+export async function findUser(data) {
+  return await User.findOne(data);
 }
 
-export const updateUser = (filter, data) => {
-  return User.findOneAndUpdate(filter, data);
-};
+export async function updateUser(filter, data) {
+  return await User.findOneAndUpdate(filter, data);
+}

@@ -12,6 +12,8 @@ export const signUp = async (req, res, next) => {
       throw HttpError(409, `Email ${email} in use`);
     }
 
+    console.log("test :>> ", req.body);
+
     const newUser = await authServises.saveUser(req.body);
 
     res
