@@ -1,37 +1,247 @@
 ## Домашнє завдання. MongoDB и Mongoose
 
-### Гілка 03-mongodb
+### Гілка 04-auth
 
-Продовжуємо створення REST API для роботи з колекцією контактів.
+Продовжуємо створення REST API для роботи з колекцією контактів. Додати логіку аутентифікації / авторизації користувача через [JWT](https://jwt.io/).
 
 ### Крок 1
 
-Створити аккаунт на [MongoDB Atlas](https://www.mongodb.com/products/tools/compass). Після чого в акаунті створити новий проект і налаштувати безкоштовний кластер.
+1. У коді створити схему і модель користувача для колекції users.
+
+```js
+{
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+  },
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+  },
+  subscription: {
+    type: String,
+    enum: ["starter", "pro", "business"],
+    default: "starter"
+  },
+  token: {
+    type: String,
+    default: null,
+  },
+}
+```
+
+2. Змінити схему контактів, щоб кожен користувач бачив тільки свої контакти. Для цього в схемі контактів додати властивість
+
+```js
+   owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+    }
+```
 
 ### Крок 2
 
-Встановити графічний редактор [MongoDB Compass](https://www.mongodb.com/try/download/compass) для зручної роботи з базою даних для MongoDB. Налаштувати підключення своєї хмарної бази даних до Compass. У MongoDB Atlas створити користувача з правами адміністратора.
+#### Реєстрація
+
+1. Створити ендпоінт `/users/register `
+2. Зробити валідацію всіх обов'язкових полів (email і password). При помилці валідації повернути `Помилку валідації`.
+
+- У разі успішної валідації в моделі `User` створити користувача за даними, які пройшли валідацію. Для засолювання паролів використовуй [bcrypt](https://www.npmjs.com/package/bcrypt) або [bcryptjs](https://www.npmjs.com/package/bcryptjs)
+- Якщо пошта вже використовується кимось іншим, повернути `Помилку Conflict`.
+- В іншому випадку повернути `Успішна відповідь`.
+
+**Registration request**
+
+```shell
+POST /users/register
+Content-Type: application/json
+RequestBody: {
+  "email": "example@example.com",
+  "password": "examplepassword"
+}
+```
+
+**Registration validation error**
+
+```shell
+Status: 400 Bad Request
+Content-Type: application/json
+ResponseBody: <Помилка від Joi або іншої бібліотеки валідації>
+```
+
+**Registration conflict error**
+
+```shell
+Status: 409 Conflict
+Content-Type: application/json
+ResponseBody: {
+  "message": "Email in use"
+}
+```
+
+**Registration success response**
+
+```shell
+Status: 201 Created
+Content-Type: application/json
+ResponseBody: {
+  "user": {
+    "email": "example@example.com",
+    "subscription": "starter"
+  }
+}
+```
+
+#### Логін
+
+1. Створити ендпоінт `/users/login`
+2. В моделі `User` знайти користувача за `email`.
+3. Зробити валідацію всіх обов'язкових полів (email і password). При помилці валідації повернути `Помилку валідації`.
+
+- В іншому випадку, порівняти пароль для знайденого користувача, якщо паролі збігаються створити токен, зберегти в поточного юзера і повернути успішну відповідь.
+- Якщо пароль або імейл невірний, повернути помилку Unauthorized.
+
+**Login request**
+
+```shell
+POST /users/login
+Content-Type: application/json
+RequestBody: {
+  "email": "example@example.com",
+  "password": "examplepassword"
+}
+```
+
+**Login validation error**
+
+```shell
+Status: 400 Bad Request
+Content-Type: application/json
+ResponseBody: {
+  "message": "Помилка від Joi або іншої бібліотеки валідації"
+}
+```
+
+**Login success response**
+
+```shell
+Status: 200 OK
+Content-Type: application/json
+ResponseBody: {
+  "token": "exampletoken",
+  "user": {
+    "email": "example@example.com",
+    "subscription": "starter"
+  }
+}
+```
+
+**Login auth error**
+
+```shell
+Status: 401 Unauthorized
+ResponseBody: {
+  "message": "Email or password is wrong"
+}
+```
 
 ### Крок 3
 
-Через Compass створити базу даних `db-contacts` і в ній колекцію `contacts`. За допомогою Compass наповнити колекцію `contacts` (зроби імпорт) його вмістом.
+#### Перевірка токена
+
+Створити мідлвар для перевірки токена і додай його до всіх раутів, які повинні бути захищені.
+
+- Мідлвар бере токен з заголовків `Authorization`, перевіряє токен на валідність.
+- У випадку помилки повернути помилку `Unauthorized`.
+- Якщо валідація пройшла успішно, отримати з токена `id` користувача. Знайти користувача в базі даних з цим `id`.
+- Якщо користувач існує і токен збігається з тим, що знаходиться в базі, записати його дані в `req.user` і викликати `next()`.
+- Якщо користувача з таким `id` НЕ існує або токени не збігаються, повернути помилку `Unauthorized`
+
+**Middleware unauthorized error**
+
+```shell
+Status: 401 Unauthorized
+Content-Type: application/json
+ResponseBody: {
+  "message": "Not authorized"
+}
+```
 
 ### Крок 4
 
-Використати вихідний код домашньої работи #2 і замінити зберігання контактів з json-файлу на створену базу даних.
+#### Логаут
 
-- Написати код для створення підключення до `MongoDB` за допомогою `Mongoose`.
-- При успішному підключенні вивести в консоль повідомлення `"Database connection successful"`.
-- Обов'язково обробити помилку підключення. Вивести в консоль повідомлення помилки і заверши процес використовуючи `process.exit(1)`.
-- У функціях обробки запитів заміни код CRUD-операцій над контактами з файлу, на Mongoose-методи для роботи з колекцією контактів в базі даних.
+1. Створити ендпоінт `/users/logout`
+2. Додати в маршрут мідлвар перевірки токена.
+
+- У моделі User знайти користувача за `_id`.
+- Якщо користувача не існує, повернути Помилку `Unauthorized`.
+- В іншому випадку, видалити токен у поточного юзера і повернути `Успішна відповідь`.
+
+**Logout request**
+
+```shell
+POST /users/logout
+Authorization: "Bearer {{token}}"
+```
+
+**Logout unauthorized error**
+
+```shell
+Status: 401 Unauthorized
+Content-Type: application/json
+ResponseBody: {
+  "message": "Not authorized"
+}
+```
+
+**Logout success response**
+
+```shell
+Status: 204 No Content
+```
 
 ### Крок 5
 
-У нас з'явилося в контактах додаткове поле статусу favorite, яке приймає логічне значення true або false. Воно відповідає за те, що в обраному чи ні знаходиться зазначений контакт. Потрібно реалізувати для оновлення статусу контакту новий роутер:
+#### Поточний користувач - отримати дані юзера по токені
 
-**@PATCH /api/contacts/:contactId/favorite**
+1. Створити ендпоінт `/users/current`
+2. Додати в раут мідлвар перевірки токена.
 
-- Отримує параметр `contactId`
-- Отримує `body` в json-форматі c оновленням поля `favorite`
-- Якщо з `body` все добре, викликає функцію `updateStatusContact (contactId, body)` для поновлення контакту в базі
-- За результатом роботи функції повертає оновлений об'єкт контакту і статусом `200`. В іншому випадку, повертає json з ключем `{"message":"Not found"}` і статусом `404`
+- Якщо користувача не існує, повернути Помилку `Unauthorized`
+- В іншому випадку повернути `Успішну відповідь`
+
+**Current user request**
+
+```shell
+GET /users/current
+Authorization: "Bearer {{token}}"
+```
+
+**Current user unauthorized error**
+
+```shell
+Status: 401 Unauthorized
+Content-Type: application/json
+ResponseBody: {
+  "message": "Not authorized"
+}
+```
+
+**Current user success response**
+
+```shell
+Status: 200 OK
+Content-Type: application/json
+ResponseBody: {
+  "email": "example@example.com",
+  "subscription": "starter"
+}
+```
+
+## Додаткове завдання
+
+- Зробити пагінацію для колекції контактів `GET /contacts?page=1&limit=20`.
+- Зробити фільтрацію контактів по полю обраного `GET /contacts?favorite=true`
+- Оновлення підписки `subscription` користувача через ендпоінт `PATCH /users`. Підписка повинна мати одне з наступних значень `['starter', 'pro', 'business']`
