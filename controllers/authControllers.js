@@ -18,7 +18,9 @@ export const signUp = async (req, res, next) => {
 
     res
       .status(201)
-      .json({ email: newUser.email, subscription: newUser.subscription });
+      .json({
+        user: { email: newUser.email, subscription: newUser.subscription },
+      });
   } catch (error) {
     next(error);
   }
