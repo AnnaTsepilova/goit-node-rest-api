@@ -12,15 +12,11 @@ export const signUp = async (req, res, next) => {
       throw HttpError(409, `Email ${email} in use`);
     }
 
-    console.log("test :>> ", req.body);
-
     const newUser = await authServises.saveUser(req.body);
 
-    res
-      .status(201)
-      .json({
-        user: { email: newUser.email, subscription: newUser.subscription },
-      });
+    res.status(201).json({
+      user: { email: newUser.email, subscription: newUser.subscription },
+    });
   } catch (error) {
     next(error);
   }
