@@ -5,6 +5,7 @@ import { emailRegexp, passwordRegexp } from "../constants/user-constants.js";
 export const authSignUpSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().min(6).pattern(passwordRegexp).required(),
+  avatarURL: Joi.string(),
 });
 
 export const authSignInSchema = Joi.object({
@@ -14,4 +15,8 @@ export const authSignInSchema = Joi.object({
 
 export const subscriptionSchema = Joi.object({
   subscription: Joi.string().valid("starter", "pro", "business"),
+});
+
+export const avatarSchema = Joi.object({
+  avatarURL: Joi.string(),
 });

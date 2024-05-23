@@ -12,15 +12,11 @@ export const signUp = async (req, res, next) => {
       throw HttpError(409, `Email ${email} in use`);
     }
 
-    console.log("test :>> ", req.body);
-
     const newUser = await authServises.saveUser(req.body);
 
-    res
-      .status(201)
-      .json({
-        user: { email: newUser.email, subscription: newUser.subscription },
-      });
+    res.status(201).json({
+      user: { email: newUser.email, subscription: newUser.subscription },
+    });
   } catch (error) {
     next(error);
   }
@@ -103,6 +99,28 @@ export const updateSubscription = async (req, res, next) => {
     }
 
     return res.status(200).json({ email: result.email, subscription });
+  } catch (error) {
+    next(error.message);
+  }
+};
+
+export const updateAvatar = async (req, res, next) => {
+  try {
+    console.log("req.body :>> ", req.body);
+    console.log("req.file :>> ", req.file);
+
+    // const { _id } = req.user;
+    // const { subscription } = req.body;
+    // const result = await authServises.updateUser(
+    //   { _id },
+    //   {
+    //     subscription: subscription,
+    //   }
+    // );
+    // if (!result) {
+    //   throw HttpError(400, "Missing field subscription");
+    // }
+    // return res.status(200).json({ email: result.email, subscription });
   } catch (error) {
     next(error.message);
   }
