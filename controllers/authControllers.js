@@ -1,7 +1,13 @@
+import fs from "fs/promises";
+import path from "path";
+
 import * as authServises from "../services/authServices.js";
 import HttpError from "../helpers/HttpError.js";
 import compareHash from "../helpers/compareHash.js";
 import { createToken } from "../helpers/jwt.js";
+import imgResize from "../helpers/imgResize.js";
+
+const avatarPath = path.resolve("public", "avatars");
 
 export const signUp = async (req, res, next) => {
   try {
@@ -106,21 +112,26 @@ export const updateSubscription = async (req, res, next) => {
 
 export const updateAvatar = async (req, res, next) => {
   try {
-    console.log("req.body :>> ", req.body);
-    console.log("req.file :>> ", req.file);
+    const { _id } = req.user;
 
-    // const { _id } = req.user;
-    // const { subscription } = req.body;
-    // const result = await authServises.updateUser(
-    //   { _id },
-    //   {
-    //     subscription: subscription,
-    //   }
-    // );
-    // if (!result) {
-    //   throw HttpError(400, "Missing field subscription");
-    // }
-    // return res.status(200).json({ email: result.email, subscription });
+    const { path: oldPath, filename } = req.file;
+
+    if (!req.file) {
+      throw HttpError(401, { message: "Please upload a file" });
+    }
+    const newPath = path.join(avatarPath, filename);
+    await fs.rename(oldPath, newPath);
+    await imgResize(newPath);
+    const avatarURL = path.join("avatars", filename);
+
+    const result = await authServises.updateUser(
+      { _id },
+      { avatarURL: avatarURL }
+    );
+    if (!result) {
+      throw HttpError(401, "Not authorized");
+    }
+    return res.status(200).json({ avatarURL: avatarURL });
   } catch (error) {
     next(error.message);
   }

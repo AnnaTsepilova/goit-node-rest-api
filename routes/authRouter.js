@@ -10,7 +10,6 @@ import {
   authSignUpSchema,
   authSignInSchema,
   subscriptionSchema,
-  avatarSchema,
 } from "../schemas/authSchemas.js";
 
 const authRouter = express.Router();
@@ -44,10 +43,8 @@ authRouter.patch(
 
 authRouter.patch(
   "/avatars",
-  upload.single("avatarURL"),
   authenticate,
-  isEmptyBody,
-  validateBody(avatarSchema),
+  upload.single("avatarURL"),
   authControllers.updateAvatar
 );
 

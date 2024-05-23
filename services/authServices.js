@@ -1,10 +1,12 @@
 import bcrypt from "bcrypt";
+import gravatar from "gravatar";
 
 import User from "../models/User.js";
 
 export async function saveUser(data) {
   const hashPassword = await bcrypt.hash(data.password, 10);
-  return User.create({ ...data, password: hashPassword });
+  const avatarURL = gravatar.url(data.email);
+  return User.create({ ...data, password: hashPassword, avatarURL: avatarURL });
 }
 
 export async function findUser(data) {
