@@ -16,3 +16,7 @@ export async function findUser(data) {
 export async function updateUser(filter, data) {
   return await User.findOneAndUpdate(filter, data);
 }
+
+export async function deleteAllUsers() {
+  await User.deleteMany();
+}
