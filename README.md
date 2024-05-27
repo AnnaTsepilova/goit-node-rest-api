@@ -1,247 +1,79 @@
 ## Домашнє завдання. MongoDB и Mongoose
 
-### Гілка 04-auth
+### Гілка hw05-avatars
 
-Продовжуємо створення REST API для роботи з колекцією контактів. Додати логіку аутентифікації / авторизації користувача через [JWT](https://jwt.io/).
+Продовжуємо створення REST API для роботи з колекцією контактів. Додати можливість завантаження аватарки користувача через [Multer] (https://github.com/expressjs/multer).
 
 ### Крок 1
 
-1. У коді створити схему і модель користувача для колекції users.
+Створити папку `public` для роздачі статики. У цій папці зроби папку `avatars`. Налаштувати Express на роздачу статичних файлів з папки `public`.
 
-```js
-{
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-  },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-  },
-  subscription: {
-    type: String,
-    enum: ["starter", "pro", "business"],
-    default: "starter"
-  },
-  token: {
-    type: String,
-    default: null,
-  },
-}
-```
+Покласти будь-яке зображення в папку `public/avatars` і перевірити, що роздача статики працює. При переході по такому URL браузер відобразить зображення.
 
-2. Змінити схему контактів, щоб кожен користувач бачив тільки свої контакти. Для цього в схемі контактів додати властивість
-
-```js
-   owner: {
-      type: Schema.Types.ObjectId,
-      ref: 'user',
-    }
+```shell
+http://locahost:<порт>/avatars/<ім'я файлу з розширенням>
 ```
 
 ### Крок 2
 
-#### Реєстрація
-
-1. Створити ендпоінт `/users/register `
-2. Зробити валідацію всіх обов'язкових полів (email і password). При помилці валідації повернути `Помилку валідації`.
-
-- У разі успішної валідації в моделі `User` створити користувача за даними, які пройшли валідацію. Для засолювання паролів використовуй [bcrypt](https://www.npmjs.com/package/bcrypt) або [bcryptjs](https://www.npmjs.com/package/bcryptjs)
-- Якщо пошта вже використовується кимось іншим, повернути `Помилку Conflict`.
-- В іншому випадку повернути `Успішна відповідь`.
-
-**Registration request**
+У схему користувача додати нову властивість `avatarURL` для зберігання зображення.
 
 ```shell
-POST /users/register
-Content-Type: application/json
-RequestBody: {
-  "email": "example@example.com",
-  "password": "examplepassword"
+{
+  ...
+  avatarURL: String,
+  ...
 }
 ```
 
-**Registration validation error**
-
-```shell
-Status: 400 Bad Request
-Content-Type: application/json
-ResponseBody: <Помилка від Joi або іншої бібліотеки валідації>
-```
-
-**Registration conflict error**
-
-```shell
-Status: 409 Conflict
-Content-Type: application/json
-ResponseBody: {
-  "message": "Email in use"
-}
-```
-
-**Registration success response**
-
-```shell
-Status: 201 Created
-Content-Type: application/json
-ResponseBody: {
-  "user": {
-    "email": "example@example.com",
-    "subscription": "starter"
-  }
-}
-```
-
-#### Логін
-
-1. Створити ендпоінт `/users/login`
-2. В моделі `User` знайти користувача за `email`.
-3. Зробити валідацію всіх обов'язкових полів (email і password). При помилці валідації повернути `Помилку валідації`.
-
-- В іншому випадку, порівняти пароль для знайденого користувача, якщо паролі збігаються створити токен, зберегти в поточного юзера і повернути успішну відповідь.
-- Якщо пароль або імейл невірний, повернути помилку Unauthorized.
-
-**Login request**
-
-```shell
-POST /users/login
-Content-Type: application/json
-RequestBody: {
-  "email": "example@example.com",
-  "password": "examplepassword"
-}
-```
-
-**Login validation error**
-
-```shell
-Status: 400 Bad Request
-Content-Type: application/json
-ResponseBody: {
-  "message": "Помилка від Joi або іншої бібліотеки валідації"
-}
-```
-
-**Login success response**
-
-```shell
-Status: 200 OK
-Content-Type: application/json
-ResponseBody: {
-  "token": "exampletoken",
-  "user": {
-    "email": "example@example.com",
-    "subscription": "starter"
-  }
-}
-```
-
-**Login auth error**
-
-```shell
-Status: 401 Unauthorized
-ResponseBody: {
-  "message": "Email or password is wrong"
-}
-```
+- Використати пакет [gravatar](https://www.npmjs.com/package/gravatar) для того, щоб при реєстрації нового користувача відразу згенерувати йому аватар по його `email`.
 
 ### Крок 3
 
-#### Перевірка токена
+При реєстрації користувача:
 
-Створити мідлвар для перевірки токена і додай його до всіх раутів, які повинні бути захищені.
-
-- Мідлвар бере токен з заголовків `Authorization`, перевіряє токен на валідність.
-- У випадку помилки повернути помилку `Unauthorized`.
-- Якщо валідація пройшла успішно, отримати з токена `id` користувача. Знайти користувача в базі даних з цим `id`.
-- Якщо користувач існує і токен збігається з тим, що знаходиться в базі, записати його дані в `req.user` і викликати `next()`.
-- Якщо користувача з таким `id` НЕ існує або токени не збігаються, повернути помилку `Unauthorized`
-
-**Middleware unauthorized error**
-
-```shell
-Status: 401 Unauthorized
-Content-Type: application/json
-ResponseBody: {
-  "message": "Not authorized"
-}
-```
+- Створити посилання на аватарку користувача за допомогою [gravatar](https://www.npmjs.com/package/gravatar)
+- Отриманий URL зберегти в полі `avatarURL` під час створення користувача
 
 ### Крок 4
 
-#### Логаут
-
-1. Створити ендпоінт `/users/logout`
-2. Додати в маршрут мідлвар перевірки токена.
-
-- У моделі User знайти користувача за `_id`.
-- Якщо користувача не існує, повернути Помилку `Unauthorized`.
-- В іншому випадку, видалити токен у поточного юзера і повернути `Успішна відповідь`.
-
-**Logout request**
+Додати можливість поновлення аватарки, створивши ендпоінт `/users/avatars` і використовуючи метод` PATCH`.
 
 ```shell
-POST /users/logout
+**# Запит**
+PATCH /users/avatars
+Content-Type: multipart/form-data
 Authorization: "Bearer {{token}}"
-```
+RequestBody: завантажений файл
 
-**Logout unauthorized error**
-
-```shell
-Status: 401 Unauthorized
-Content-Type: application/json
-ResponseBody: {
-  "message": "Not authorized"
-}
-```
-
-**Logout success response**
-
-```shell
-Status: 204 No Content
-```
-
-### Крок 5
-
-#### Поточний користувач - отримати дані юзера по токені
-
-1. Створити ендпоінт `/users/current`
-2. Додати в раут мідлвар перевірки токена.
-
-- Якщо користувача не існує, повернути Помилку `Unauthorized`
-- В іншому випадку повернути `Успішну відповідь`
-
-**Current user request**
-
-```shell
-GET /users/current
-Authorization: "Bearer {{token}}"
-```
-
-**Current user unauthorized error**
-
-```shell
-Status: 401 Unauthorized
-Content-Type: application/json
-ResponseBody: {
-  "message": "Not authorized"
-}
-```
-
-**Current user success response**
-
-```shell
+**# Успішна відповідь**
+{
 Status: 200 OK
 Content-Type: application/json
 ResponseBody: {
-  "email": "example@example.com",
-  "subscription": "starter"
+  "avatarURL": "тут буде посилання на зображення"
+}
+
+**# Неуспішна відповідь**
+{
+Status: 401 Unauthorized
+Content-Type: application/json
+ResponseBody: {
+  "message": "Not authorized"
 }
 ```
 
-## Додаткове завдання
+- Створити папку `tmp` в корені проєкту і зберігати в неї завантажену аватарку.
+- Обробити аватарку пакетом [jimp](https://www.npmjs.com/package/jimp) і поставити для неї розміри 250 на 250
+- Перенести аватарку користувача з папки `tmp` в папку `public/avatars` і дати їй унікальне ім'я для конкретного користувача.
+- Отриманий `URL` `/avatars/<ім'я файлу з розширенням>` зберегти в поле `avatarURL` користувача
 
-- Зробити пагінацію для колекції контактів `GET /contacts?page=1&limit=20`.
-- Зробити фільтрацію контактів по полю обраного `GET /contacts?favorite=true`
-- Оновлення підписки `subscription` користувача через ендпоінт `PATCH /users`. Підписка повинна мати одне з наступних значень `['starter', 'pro', 'business']`
+## Додаткове завдання - необов'язкове
+
+### Написати unit-тести для контролера входу (login/signin)
+
+За допомогою [Jest](https://jestjs.io/ru/docs/getting-started)
+
+- відповідь повина мати статус-код 200
+- у відповіді повинен повертатися токен
+- у відповіді повинен повертатися об'єкт `user` з 2 полями `email` та `subscription` з типом даних `String`

@@ -4,6 +4,7 @@ import * as authControllers from "../controllers/authControllers.js";
 import isEmptyBody from "../helpers/isEmptyBody.js";
 import validateBody from "../helpers/validateBody.js";
 import authenticate from "../middlewares/authenticate.js";
+import upload from "../middlewares/upload.js";
 
 import {
   authSignUpSchema,
@@ -15,6 +16,7 @@ const authRouter = express.Router();
 
 authRouter.post(
   "/register",
+  upload.single("avatarURL"),
   isEmptyBody,
   validateBody(authSignUpSchema),
   authControllers.signUp
@@ -37,6 +39,13 @@ authRouter.patch(
   isEmptyBody,
   validateBody(subscriptionSchema),
   authControllers.updateSubscription
+);
+
+authRouter.patch(
+  "/avatars",
+  authenticate,
+  upload.single("avatarURL"),
+  authControllers.updateAvatar
 );
 
 export default authRouter;
