@@ -10,7 +10,7 @@ import {
   authSignUpSchema,
   authSignInSchema,
   subscriptionSchema,
-  // verifyEmailSchema,
+  authEmailSchema,
 } from "../schemas/authSchemas.js";
 
 const authRouter = express.Router();
@@ -49,12 +49,13 @@ authRouter.patch(
   authControllers.updateAvatar
 );
 
-authRouter.get(
-  "/verify/:verificationToken",
-  //validateBody(verifyEmailSchema),
-  authControllers.verifyEmail
-);
+authRouter.get("/verify/:verificationToken", authControllers.verifyEmail);
 
-//authRouter.post("/verify", validateBody(), authControllers.resendVerifyEmail);
+authRouter.post(
+  "/verify",
+  isEmptyBody,
+  validateBody(authEmailSchema),
+  authControllers.resendVerifyEmail
+);
 
 export default authRouter;
