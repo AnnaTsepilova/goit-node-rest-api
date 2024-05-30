@@ -41,18 +41,18 @@
 }
 ```
 
-**2.** Створити ендпоінт `GET /users/verify/:verificationToken(# verification-request)`, де по параметру `verificationToken` ми будемо шукати користувача в моделі `User`
+**2.** Створити ендпоінт `GET /users/verify/:verificationToken`, де по параметру `verificationToken` ми будемо шукати користувача в моделі `User`
 
 - Якщо користувач з таким токеном не знайдений, необхідно повернути Помилку `'Not Found'`
 - Якщо користувач знайдений, встановлюємо `verificationToken` в `null`, а поле `verify` ставимо рівним `true` в документі користувача і повертаємо `Успішну відповідь`
 
-**# Verification request**
+**Verification request**
 
 ```shell
 GET /auth/verify/:verificationToken
 ```
 
-**# Verification user Not Found**
+**Verification user Not Found**
 
 ```shell
 Status: 404 Not Found
@@ -61,7 +61,7 @@ message: 'User not found'
 }
 ```
 
-**# Verification success response**
+**Verification success response**
 
 ```shell
 Status: 200 OK
@@ -77,7 +77,7 @@ message: 'Verification successful',
 При створення користувача при реєстрації:
 
 - Створити `verificationToken` для користувача і записати його в БД (для генерації токена використовуйте пакет [uuid](https://www.npmjs.com/package/uuid) або [nanoid](https://www.npmjs.com/package/nanoid))
-- Відправити email на пошту користувача і вказати посилання для верифікації email'а ( `/users/verify/:verificationToken`) в повідомленні
+- Відправити email на пошту користувача і вказати посилання для верифікації email'а (`/users/verify/:verificationToken`) в повідомленні
 
 Так само необхідно враховувати, що тепер логін користувача не дозволено, якщо не верифікувано email
 
