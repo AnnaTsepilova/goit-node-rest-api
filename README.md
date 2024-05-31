@@ -137,3 +137,8 @@ ResponseBody: {
 ### Додаткове завдання (необов'язкове)
 
 Написати `dockerfile` для своєї програми.
+
+Для запуску додатку в docker треба виконати наступні команди:
+
+1. `docker build . -t contacts-app`
+2. `docker run --name contacts-app -p 3000:3000 -d contacts-app:latest`
