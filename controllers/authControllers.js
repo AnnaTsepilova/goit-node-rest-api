@@ -1,11 +1,13 @@
 import fs from "fs/promises";
 import path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 import * as authServises from "../services/authServices.js";
 import HttpError from "../helpers/HttpError.js";
 import compareHash from "../helpers/compareHash.js";
 import { createToken } from "../helpers/jwt.js";
 import imgResize from "../helpers/imgResize.js";
+import sendEmail from "../helpers/sendEmail.js";
 
 const avatarPath = path.resolve("public", "avatars");
 
@@ -17,12 +19,70 @@ export const signUp = async (req, res, next) => {
     if (user) {
       throw HttpError(409, `Email ${email} in use`);
     }
+    const verificationToken = uuidv4();
+    const newUser = await authServises.saveUser({
+      ...req.body,
+      verificationToken,
+    });
 
-    const newUser = await authServises.saveUser(req.body);
+    await sendEmail(email, verificationToken);
 
     res.status(201).json({
       user: { email: newUser.email, subscription: newUser.subscription },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await authServises.findUser({ verificationToken });
+
+    if (!user) {
+      throw HttpError(404, "User not found");
+    }
+
+    if (user.verify) {
+      return res.status(200).json({ message: "User has already verified" });
+    }
+
+    await authServises.updateUser(
+      { _id: user._id },
+      {
+        verify: true,
+        verificationToken: null,
+      }
+    );
+
+    res.status(200).json({ message: "Verification successful" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resendVerifyEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Missing required field email" });
+    }
+
+    const user = await authServises.findUser({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.verify) {
+      return res
+        .status(400)
+        .json({ message: "Verification has already been passed" });
+    }
+
+    await sendEmail(email, user.verificationToken);
+
+    return res.status(200).json({ message: "Verification email sent" });
   } catch (error) {
     next(error);
   }
@@ -35,6 +95,10 @@ export const signIn = async (req, res, next) => {
 
     if (!user) {
       throw HttpError(401, "Email or password is wrong");
+    }
+
+    if (!user.verify) {
+      throw HttpError(401, "Verification has not been passed yet");
     }
 
     const comparePassword = await compareHash(password, user.password);
