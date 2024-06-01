@@ -1,4 +1,4 @@
-## Домашнє завдання. MongoDB и Mongoose
+## Домашнє завдання. Робота з email та Docker
 
 ### Гілка hw06-email
 
